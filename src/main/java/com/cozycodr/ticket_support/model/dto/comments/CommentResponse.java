@@ -1,4 +1,4 @@
-package com.cozycodr.ticket_support.model.dto;
+package com.cozycodr.ticket_support.model.dto.comments;
 
 import lombok.Builder;
 import lombok.Data;

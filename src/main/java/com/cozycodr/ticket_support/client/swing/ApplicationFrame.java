@@ -7,7 +7,6 @@ import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
 
 @Slf4j
 public class ApplicationFrame extends JFrame {
@@ -60,7 +59,7 @@ public class ApplicationFrame extends JFrame {
                         JOptionPane.ERROR_MESSAGE
                 );
             }
-        });
+        }, () -> cardLayout.show(mainCardPanel, "LOGIN"));
 
         mainPanel = new MainPanel();
 

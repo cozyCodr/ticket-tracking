@@ -34,7 +34,7 @@ import static com.cozycodr.ticket_support.helpers.ResponseHelpers.buildErrorResp
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    protected ResponseEntity<ApiResponseBody> handleResourceNotFoundException(
+    protected ResponseEntity<ApiResponseBody<ErrorResponse>> handleResourceNotFoundException(
             ResourceNotFoundException ex,
             WebRequest request) {
 
@@ -51,7 +51,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(BadRequestException.class)
-    protected ResponseEntity<ApiResponseBody> handleBadRequestException(
+    protected ResponseEntity<ApiResponseBody<ErrorResponse>> handleBadRequestException(
             BadRequestException ex,
             WebRequest request) {
 
@@ -68,7 +68,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(HttpClientErrorException.UnprocessableEntity.class)
-    protected ResponseEntity<ApiResponseBody> handleUnprocessableEntityException(
+    protected ResponseEntity<ApiResponseBody<ErrorResponse>> handleUnprocessableEntityException(
             BadRequestException ex,
             WebRequest request) {
 
@@ -118,7 +118,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    protected ResponseEntity<ApiResponseBody> handleConstraintViolationException(
+    protected ResponseEntity<ApiResponseBody<ErrorResponse>> handleConstraintViolationException(
             ConstraintViolationException ex,
             WebRequest request) {
 
@@ -145,7 +145,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    protected ResponseEntity<ApiResponseBody> handleAllUncaughtException(
+    protected ResponseEntity<ApiResponseBody<ErrorResponse>> handleAllUncaughtException(
             Exception ex,
             WebRequest request) {
 
@@ -157,7 +157,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .path(((ServletWebRequest) request).getRequest().getRequestURI())
                 .build();
 
-        // Include stack trace in development environment
+        // Include stack trace in development environment only
         if (isDevelopment()) {
             errorResponse.setDebug(getStackTrace(ex));
         }

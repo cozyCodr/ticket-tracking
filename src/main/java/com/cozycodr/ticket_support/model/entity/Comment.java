@@ -28,10 +28,12 @@ public class Comment {
 
     @JsonIgnore
     @ManyToOne
+    @JoinColumn(nullable = false)
     private Ticket ticket;
 
     @JsonIgnore
     @ManyToOne
+    @JoinColumn(nullable = false)
     private User commenter;
 
     @CreationTimestamp

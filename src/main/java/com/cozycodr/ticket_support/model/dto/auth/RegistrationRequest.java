@@ -1,4 +1,4 @@
-package com.cozycodr.ticket_support.model.dto;
+package com.cozycodr.ticket_support.model.dto.auth;
 
 import com.cozycodr.ticket_support.model.enums.Role;
 import jakarta.validation.constraints.NotBlank;

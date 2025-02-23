@@ -1,14 +1,16 @@
 package com.cozycodr.ticket_support.client.swing;
 
 import com.cozycodr.ticket_support.client.service.AuthenticationService;
-import com.cozycodr.ticket_support.model.dto.RegistrationRequest;
+import com.cozycodr.ticket_support.model.dto.auth.RegistrationRequest;
 import com.cozycodr.ticket_support.model.enums.Role;
+import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
 
+@Slf4j
 public class SignupPanel extends JPanel {
 
     private final JTextField firstNameField;
@@ -106,7 +108,7 @@ public class SignupPanel extends JPanel {
 
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                cardLayout.show(mainCardPanel, "LOGIN");
+                loginNavigationHandler.run();
             }
         });
 
@@ -198,6 +200,7 @@ public class SignupPanel extends JPanel {
             );
 
         } catch (Exception ex) {
+            log.error(ex.getMessage());
             callback.onSignupError("Error during signup: " + ex.getMessage());
         }
     }

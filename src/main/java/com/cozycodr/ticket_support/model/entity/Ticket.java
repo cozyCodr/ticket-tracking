@@ -45,7 +45,7 @@ public class Ticket {
     private TicketStatus status = TicketStatus.NEW;
 
     @JsonIgnore
-    @Column(nullable = false)
+    @JoinColumn(nullable = false)
     @ManyToOne(cascade = CascadeType.ALL)
     private User raisedBy;
 
@@ -59,4 +59,9 @@ public class Ticket {
 
     @UpdateTimestamp
     private LocalDateTime updatedDate;
+
+    public void addComment(Comment comment) {
+        if (comments == null) comments = new ArrayList<>();
+        comments.add(comment);
+    }
 }

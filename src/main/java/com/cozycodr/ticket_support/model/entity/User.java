@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "app_user")
 @Data
 @Builder
 @NoArgsConstructor
@@ -60,5 +60,10 @@ public class User {
     public void addTicket(Ticket t){
         if (ticketsRaised == null) ticketsRaised = new ArrayList<>();
         ticketsRaised.add(t);
+    }
+
+    public void addComment(Comment comment) {
+        if (comments == null) comments = new ArrayList<>();
+        comments.add(comment);
     }
 }

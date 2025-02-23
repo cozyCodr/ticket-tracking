@@ -1,4 +1,4 @@
-package com.cozycodr.ticket_support.model.dto;
+package com.cozycodr.ticket_support.model.dto.ticket;
 
 import com.cozycodr.ticket_support.model.enums.TicketCategory;
 import com.cozycodr.ticket_support.model.enums.TicketPriority;

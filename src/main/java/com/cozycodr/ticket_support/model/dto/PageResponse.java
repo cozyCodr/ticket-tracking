@@ -2,7 +2,6 @@ package com.cozycodr.ticket_support.model.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.data.domain.Page;
 
 import java.util.List;
 

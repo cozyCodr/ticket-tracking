@@ -1,4 +1,4 @@
-package com.cozycodr.ticket_support.model.dto;
+package com.cozycodr.ticket_support.model.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

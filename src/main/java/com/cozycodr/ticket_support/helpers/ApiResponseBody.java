@@ -7,6 +7,6 @@ import java.util.Map;
 
 
 @Builder
-public record ApiResponseBody(String message, int statusCode, Object data) {
+public record ApiResponseBody<T>(String message, int statusCode, T data) {
 
 }

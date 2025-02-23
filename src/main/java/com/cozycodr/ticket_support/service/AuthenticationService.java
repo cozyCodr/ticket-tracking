@@ -3,9 +3,9 @@ package com.cozycodr.ticket_support.service;
 import com.cozycodr.ticket_support.exception.ResourceNotFoundException;
 import com.cozycodr.ticket_support.exception.UserAlreadyExistsException;
 import com.cozycodr.ticket_support.helpers.ApiResponseBody;
-import com.cozycodr.ticket_support.model.dto.AuthDataResponse;
-import com.cozycodr.ticket_support.model.dto.LoginRequest;
-import com.cozycodr.ticket_support.model.dto.RegistrationRequest;
+import com.cozycodr.ticket_support.model.dto.auth.AuthDataResponse;
+import com.cozycodr.ticket_support.model.dto.auth.LoginRequest;
+import com.cozycodr.ticket_support.model.dto.auth.RegistrationRequest;
 import com.cozycodr.ticket_support.model.entity.User;
 import com.cozycodr.ticket_support.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-    public ResponseEntity<ApiResponseBody> register(RegistrationRequest request) {
+    public ResponseEntity<ApiResponseBody<AuthDataResponse>> register(RegistrationRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new UserAlreadyExistsException("Username already exists");
         }
@@ -55,7 +55,7 @@ public class AuthenticationService {
 
     }
 
-    public ResponseEntity<ApiResponseBody> login(LoginRequest request) {
+    public ResponseEntity<ApiResponseBody<AuthDataResponse>> login(LoginRequest request) {
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -72,10 +72,10 @@ public class AuthenticationService {
         var data = AuthDataResponse.builder()
                 .token(token)
                 .username(((UserDetails) user).getUsername())
-                .role(((User)user).getRole().name())
+                .role((user).getRole().name())
                 .build();
 
-        auditLogService.logNewUserLogin((User) user);
+        auditLogService.logNewUserLogin( user);
 
         return buildSuccessResponse(HttpStatus.CREATED, "User Registered", data);
     }
