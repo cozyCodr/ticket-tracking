@@ -1,17 +1,25 @@
 package com.cozycodr.ticket_support.client.swing;
 
-import com.cozycodr.ticket_support.client.service.AuthenticationService;
-import com.cozycodr.ticket_support.model.dto.auth.RegistrationRequest;
-import com.cozycodr.ticket_support.model.enums.Role;
+import com.cozycodr.ticket_support.client.dto.AuthDataResponse;
+import com.cozycodr.ticket_support.client.dto.RegistrationRequest;
+import com.cozycodr.ticket_support.client.enums.Role;
+import com.cozycodr.ticket_support.client.service.ClientAuthenticationService;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
 
 @Slf4j
+@org.springframework.stereotype.Component
 public class SignupPanel extends JPanel {
+
+    public interface SignupCallback {
+        void onSignupSuccess(AuthDataResponse authResponse);
+        void onSignupError(String message);
+    }
 
     private final JTextField firstNameField;
     private final JTextField lastNameField;
@@ -19,33 +27,34 @@ public class SignupPanel extends JPanel {
     private final JPasswordField passwordField;
     private final JPasswordField confirmPasswordField;
     private final JComboBox<Role> roleComboBox;
-    private final AuthenticationService authService;
-    private final SignupCallback callback;
-    private final Runnable loginNavigationHandler;
+    private final ClientAuthenticationService authService;
+    private SignupCallback callback;
+    private Runnable loginNavigationHandler;
 
+    @Autowired
+    public SignupPanel(ClientAuthenticationService authService) {
+        this.authService = authService;
 
-    public interface SignupCallback {
-        void onSignupSuccess(String token);
-        void onSignupError(String message);
+        // Initialize components
+        this.firstNameField = new JTextField(20);
+        this.lastNameField = new JTextField(20);
+        this.usernameField = new JTextField(20);
+        this.passwordField = new JPasswordField(20);
+        this.confirmPasswordField = new JPasswordField(20);
+        this.roleComboBox = new JComboBox<>(Role.values());
+
+        initializeUI();
     }
 
-    public SignupPanel(SignupCallback callback, Runnable loginNavigationHandler){
+    public void setCallback(SignupCallback callback) {
         this.callback = callback;
-        this.authService = new AuthenticationService();
-        this.loginNavigationHandler = loginNavigationHandler;
-
-        // Initializing components
-        firstNameField = new JTextField(20);
-        lastNameField = new JTextField(20);
-        usernameField = new JTextField(20);
-        passwordField = new JPasswordField(20);
-        confirmPasswordField = new JPasswordField(20);
-        roleComboBox = new JComboBox<>(Role.values());
-
-        setupUI();
     }
 
-    private void setupUI(){
+    public void setLoginNavigationHandler(Runnable loginNavigationHandler) {
+        this.loginNavigationHandler = loginNavigationHandler;
+    }
+
+    private void initializeUI(){
         setLayout(new MigLayout("fillx, insets 20", "[right][grow]", "[]10[]10[]10[]10[]10[]20[]"));
         setBackground(Color.WHITE);
 
@@ -159,10 +168,10 @@ public class SignupPanel extends JPanel {
 
     private void styleComponents() {
         // Style text fields
-        Component[] components = {firstNameField, lastNameField, usernameField,
+        java.awt.Component[] components = {firstNameField, lastNameField, usernameField,
                 passwordField, confirmPasswordField, roleComboBox};
 
-        for (Component comp : components) {
+        for (java.awt.Component comp : components) {
             if (comp instanceof JTextField) {
                 JTextField field = (JTextField) comp;
                 field.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -194,13 +203,16 @@ public class SignupPanel extends JPanel {
             authService.register(request,
                     response -> {
                         clearForm();
-                        callback.onSignupSuccess(response.getToken());
+                        callback.onSignupSuccess(response); // Now passing AuthResponse
                     },
-                    callback::onSignupError
+                    error -> {
+                        callback.onSignupError(error);
+                        log.error("Signup error: {}", error);
+                    }
             );
 
         } catch (Exception ex) {
-            log.error(ex.getMessage());
+            log.error("Error during signup", ex);
             callback.onSignupError("Error during signup: " + ex.getMessage());
         }
     }

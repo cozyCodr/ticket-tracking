@@ -1,4 +1,4 @@
-package com.cozycodr.ticket_support.security;
+package com.cozycodr.ticket_support.config;
 
 import com.cozycodr.ticket_support.service.JwtService;
 import jakarta.servlet.FilterChain;

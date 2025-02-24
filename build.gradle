@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.3'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'idea'
 }
 
 group = 'com.cozycodr'
@@ -13,10 +14,36 @@ java {
 	}
 }
 
+// Define source sets
+sourceSets {
+	main {
+		java {
+			srcDirs = ['src/main/java']
+		}
+		resources {
+			srcDirs = ['src/main/resources']
+		}
+	}
+	client {
+		java {
+			srcDirs = ['src/client/java']
+		}
+		resources {
+			srcDirs = ['src/client/resources']
+		}
+		compileClasspath += sourceSets.main.compileClasspath
+		runtimeClasspath += sourceSets.main.runtimeClasspath
+	}
+}
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+	clientImplementation.extendsFrom implementation
+	clientRuntimeOnly.extendsFrom runtimeOnly
+	clientCompileOnly.extendsFrom compileOnly
+	clientAnnotationProcessor.extendsFrom annotationProcessor
 }
 
 repositories {
@@ -24,24 +51,84 @@ repositories {
 }
 
 dependencies {
+	// Server dependencies
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
-	implementation 'com.miglayout:miglayout-swing:11.4.2'
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	// Client dependencies
+	clientImplementation 'org.springframework.boot:spring-boot-starter'
+	clientImplementation 'com.miglayout:miglayout-swing:11.4.2'
+	clientImplementation 'com.fasterxml.jackson.core:jackson-databind'
+	clientImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+	// Shared dependencies
+	implementation 'org.projectlombok:lombok'
 	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// Development tools
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	// Database
 	runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
 	runtimeOnly 'org.postgresql:postgresql'
-	annotationProcessor 'org.projectlombok:lombok'
+
+	// Test dependencies
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+// Configure the existing compileClientJava task
+tasks.named('compileClientJava') {
+	sourceCompatibility = java.toolchain.languageVersion.get().toString()
+	targetCompatibility = java.toolchain.languageVersion.get().toString()
+}
+
+// Create client JAR
+tasks.register('clientJar', Jar) {
+	dependsOn 'clientClasses'  // This depends on compileClientJava and processClientResources
+	archiveBaseName = "ticket-support-client"
+	from sourceSets.client.output
+	manifest {
+		attributes 'Main-Class': 'com.cozycodr.ticket_support.client.TicketClientApplication'
+	}
+
+	// Include all runtime dependencies
+	from {
+		configurations.clientRuntimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+	}
+
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// Task to run client application
+tasks.register('runClient', JavaExec) {
+	dependsOn 'clientClasses'  // This depends on compileClientJava and processClientResources
+	classpath = sourceSets.client.runtimeClasspath
+	mainClass = 'com.cozycodr.ticket_support.client.TicketClientApplication'
+	workingDir = projectDir
+}
+
+// Create server JAR
+bootJar {
+	mainClass = 'com.cozycodr.ticket_support.TicketServerApplication'
+	archiveClassifier = 'server'
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// IDEA project settings
+idea {
+	module {
+		sourceDirs += file('src/client/java')
+		resourceDirs += file('src/client/resources')
+	}
 }

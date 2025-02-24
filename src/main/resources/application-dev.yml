@@ -1,0 +1,9 @@
+spring:
+  profiles:
+    active: dev
+
+logging:
+  level:
+    com.cozycodr.ticket_support: DEBUG
+    org.springframework: INFO
+    org.hibernate: INFO

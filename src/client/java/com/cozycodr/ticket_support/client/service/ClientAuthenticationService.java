@@ -1,13 +1,14 @@
 package com.cozycodr.ticket_support.client.service;
 
-import com.cozycodr.ticket_support.client.config.ObjectMapperConfig;
-import com.cozycodr.ticket_support.helpers.ApiResponseBody;
-import com.cozycodr.ticket_support.model.dto.auth.AuthDataResponse;
-import com.cozycodr.ticket_support.model.dto.auth.LoginRequest;
-import com.cozycodr.ticket_support.model.dto.auth.RegistrationRequest;
+import com.cozycodr.ticket_support.client.dto.ApiResponseBody;
+import com.cozycodr.ticket_support.client.dto.AuthDataResponse;
+import com.cozycodr.ticket_support.client.dto.LoginRequest;
+import com.cozycodr.ticket_support.client.dto.RegistrationRequest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -16,15 +17,20 @@ import java.net.http.HttpResponse;
 import java.util.function.Consumer;
 
 @Slf4j
-public class AuthenticationService {
+@Service
+public class ClientAuthenticationService {
 
-    private static final String API_BASE_URL = "http://localhost:8080/api/v1/auth";
+    private final String apiBaseUrl;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
-    public AuthenticationService() {
+    public ClientAuthenticationService(
+            @Value("${app.api.base-url}") String apiBaseUrl,
+            ObjectMapper objectMapper
+    ) {
+        this.apiBaseUrl = apiBaseUrl;
         this.httpClient = HttpClient.newHttpClient();
-        this.objectMapper = ObjectMapperConfig.createObjectMapper();
+        this.objectMapper = objectMapper;
     }
 
     public void register(RegistrationRequest request,
@@ -34,7 +40,7 @@ public class AuthenticationService {
             String requestBody = objectMapper.writeValueAsString(request);
 
             HttpRequest httpRequest = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/register"))
+                    .uri(URI.create(apiBaseUrl + "/auth/register"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
@@ -83,7 +89,7 @@ public class AuthenticationService {
             String requestBody = objectMapper.writeValueAsString(request);
 
             HttpRequest httpRequest = HttpRequest.newBuilder()
-                    .uri(URI.create(API_BASE_URL + "/login"))
+                    .uri(URI.create(apiBaseUrl + "/auth/login"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();

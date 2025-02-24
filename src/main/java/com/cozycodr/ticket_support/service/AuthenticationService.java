@@ -67,7 +67,7 @@ public class AuthenticationService {
         var user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        var token = jwtService.generateToken((UserDetails) user);
+        var token = jwtService.generateToken(user);
 
         var data = AuthDataResponse.builder()
                 .token(token)
@@ -77,6 +77,6 @@ public class AuthenticationService {
 
         auditLogService.logNewUserLogin( user);
 
-        return buildSuccessResponse(HttpStatus.CREATED, "User Registered", data);
+        return buildSuccessResponse(HttpStatus.OK, "User Authenticated", data);
     }
 }

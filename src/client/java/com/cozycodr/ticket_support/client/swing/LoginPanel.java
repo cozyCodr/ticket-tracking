@@ -1,33 +1,48 @@
 package com.cozycodr.ticket_support.client.swing;
 
+import com.cozycodr.ticket_support.client.service.ClientAuthenticationService;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.function.BiConsumer;
 
+@Component
+@Slf4j
 public class LoginPanel extends JPanel {
     private final JTextField usernameField;
     private final JPasswordField passwordField;
-    private final BiConsumer<String, String> loginHandler;
-    private final Runnable signupNavigationHandler;
+    private final ClientAuthenticationService authService;
+    private BiConsumer<String, String> loginHandler;
+    private Runnable signupNavigationHandler;
 
-    public LoginPanel(BiConsumer<String, String> loginHandler, Runnable signupNavigationHandler) {
-        this.loginHandler = loginHandler;this.signupNavigationHandler =signupNavigationHandler;
-
-        // Initialize components first
+    @Autowired
+    public LoginPanel(ClientAuthenticationService authService) {
+        this.authService = authService;
         this.usernameField = new JTextField(20);
         this.passwordField = new JPasswordField(20);
-
-        // Configure the panel
-        setLayout(new MigLayout("fill, insets 0", "[grow]", "[grow]"));
-        setBackground(Color.WHITE);
-
-        // Build the UI
-        initializeUI();
     }
 
+    @PostConstruct
     private void initializeUI() {
+        setLayout(new MigLayout("fill, insets 0", "[grow]", "[grow]"));
+        setBackground(Color.WHITE);
+        initializeComponents();
+    }
+
+    public void setLoginHandler(BiConsumer<String, String> loginHandler) {
+        this.loginHandler = loginHandler;
+    }
+
+    public void setSignupNavigationHandler(Runnable signupNavigationHandler) {
+        this.signupNavigationHandler = signupNavigationHandler;
+    }
+
+    private void initializeComponents() {
         // Create main container with white background
         JPanel container = new JPanel(new MigLayout("wrap, fillx, insets 20", "[grow]", "[]20[]"));
         container.setBackground(Color.WHITE);
@@ -167,4 +182,6 @@ public class LoginPanel extends JPanel {
         passwordField.setText("");
         usernameField.requestFocusInWindow();
     }
+
+
 }

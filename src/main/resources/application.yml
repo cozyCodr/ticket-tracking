@@ -1,3 +1,10 @@
+logging:
+  level:
+    com.cozycodr.ticket_support: DEBUG
+    org.springframework: WARN
+#  pattern:
+#    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
 spring:
   application:
     name: it-support
@@ -19,19 +26,19 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-springdoc:
-  api-docs:
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    operationsSorter: method
-
 server:
   port: 8080
   servlet:
-    context-path: /api
+    context-path: /api/v1
 
-logging:
-  pattern:
-    level: com.cozycodr.ticket_support=DEBUG
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+springdoc:
+  api-docs:
+    path: /api/v1/api-docs
+  swagger-ui:
+    path: /api/v1/swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    doc-expansion: none
+    disable-swagger-default-url: true
+  show-actuator: false
+  packages-to-scan: com.cozycodr.ticket_support.controller

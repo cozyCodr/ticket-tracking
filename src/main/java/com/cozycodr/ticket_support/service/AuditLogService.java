@@ -7,7 +7,6 @@ import com.cozycodr.ticket_support.model.entity.User;
 import com.cozycodr.ticket_support.model.enums.TicketStatus;
 import com.cozycodr.ticket_support.repository.AuditLogRepository;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
