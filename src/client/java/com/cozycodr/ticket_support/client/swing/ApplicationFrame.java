@@ -5,6 +5,7 @@ import com.cozycodr.ticket_support.client.dto.LoginRequest;
 import com.cozycodr.ticket_support.client.event.ApplicationEvent;
 import com.cozycodr.ticket_support.client.service.ClientAuthenticationService;
 import com.cozycodr.ticket_support.client.service.EventBusService;
+import com.cozycodr.ticket_support.client.utils.DialogUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -30,10 +31,9 @@ public class ApplicationFrame extends JFrame {
     private final JPanel mainCardPanel;
     private final LoginPanel loginPanel;
     private final SignupPanel signupPanel;
-    private MainPanel mainPanel;
+    private final MainPanel mainPanel;
     private final StatusBarPanel statusBarPanel;
     private final JLabel clockLabel;
-    private Timer clockTimer;
     private final EventBusService eventBus;
     private final ClientAuthenticationService authService;
 
@@ -100,11 +100,10 @@ public class ApplicationFrame extends JFrame {
             @Override
             public void onSignupError(String message) {
                 SwingUtilities.invokeLater(() -> {
-                    JOptionPane.showMessageDialog(
+                    DialogUtils.showErrorDialog(
                             ApplicationFrame.this,
                             message,
-                            "Signup Error",
-                            JOptionPane.ERROR_MESSAGE
+                            "Signup Error"
                     );
                 });
             }
@@ -166,11 +165,10 @@ public class ApplicationFrame extends JFrame {
                     });
                 },
                 errorMessage -> SwingUtilities.invokeLater(() -> {
-                    JOptionPane.showMessageDialog(
+                    DialogUtils.showErrorDialog(
                             this,
                             errorMessage,
-                            "Login Error",
-                            JOptionPane.ERROR_MESSAGE
+                            "Login Error"
                     );
                 })
         );
@@ -204,7 +202,7 @@ public class ApplicationFrame extends JFrame {
     }
 
     private void startClock() {
-        clockTimer = new Timer(1000, e -> updateClock());
+        Timer clockTimer = new Timer(1000, e -> updateClock());
         clockTimer.start();
         updateClock();
     }

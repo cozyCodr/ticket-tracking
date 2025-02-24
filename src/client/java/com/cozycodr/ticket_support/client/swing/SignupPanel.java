@@ -4,6 +4,7 @@ import com.cozycodr.ticket_support.client.dto.AuthDataResponse;
 import com.cozycodr.ticket_support.client.dto.RegistrationRequest;
 import com.cozycodr.ticket_support.client.enums.Role;
 import com.cozycodr.ticket_support.client.service.ClientAuthenticationService;
+import com.cozycodr.ticket_support.client.utils.DialogUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +17,6 @@ import java.util.Arrays;
 @org.springframework.stereotype.Component
 public class SignupPanel extends JPanel {
 
-    public interface SignupCallback {
-        void onSignupSuccess(AuthDataResponse authResponse);
-        void onSignupError(String message);
-    }
-
     private final JTextField firstNameField;
     private final JTextField lastNameField;
     private final JTextField usernameField;
@@ -30,6 +26,11 @@ public class SignupPanel extends JPanel {
     private final ClientAuthenticationService authService;
     private SignupCallback callback;
     private Runnable loginNavigationHandler;
+
+    public interface SignupCallback {
+        void onSignupSuccess(AuthDataResponse authResponse);
+        void onSignupError(String message);
+    }
 
     @Autowired
     public SignupPanel(ClientAuthenticationService authService) {
@@ -218,11 +219,10 @@ public class SignupPanel extends JPanel {
     }
 
     private void showError(String message) {
-        JOptionPane.showMessageDialog(
+        DialogUtils.showErrorDialog(
                 this,
                 message,
-                "Validation Error",
-                JOptionPane.ERROR_MESSAGE
+                "Validation Error"
         );
     }
 

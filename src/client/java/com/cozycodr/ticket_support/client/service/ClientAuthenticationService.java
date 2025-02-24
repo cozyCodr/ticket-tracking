@@ -68,7 +68,7 @@ public class ClientAuthenticationService {
                             }
                         } else {
                             log.error(requestBody);
-                            onError.accept("Registration failed: " + response.body());
+                            onError.accept("Registration failed");
                         }
                     })
                     .exceptionally(e -> {
@@ -108,13 +108,14 @@ public class ClientAuthenticationService {
                                 if (authResponse.data() != null) {
                                     onSuccess.accept(authResponse.data());
                                 } else {
-                                    onError.accept("No data in response");
+
+                                    onError.accept(response.body());
                                 }
                             } catch (Exception e) {
                                 onError.accept("Error parsing response: " + e.getMessage());
                             }
                         } else {
-                            onError.accept("Login failed: " + response.body());
+                            onError.accept("Login failed, invalid username or password" );
                         }
                     })
                     .exceptionally(e -> {
@@ -123,7 +124,7 @@ public class ClientAuthenticationService {
                     });
 
         } catch (Exception e) {
-            onError.accept("Error creating request: " + e.getMessage());
+            onError.accept(e.getMessage());
         }
     }
 }
