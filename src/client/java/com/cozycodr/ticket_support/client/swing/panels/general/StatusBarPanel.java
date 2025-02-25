@@ -1,4 +1,4 @@
-package com.cozycodr.ticket_support.client.swing;
+package com.cozycodr.ticket_support.client.swing.panels.general;
 
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +20,14 @@ public class StatusBarPanel extends JPanel {
     private Timer clockTimer;
 
     public StatusBarPanel() {
-        setLayout(new MigLayout("fillx, insets 5", "[][][grow][]"));
+        setLayout(new MigLayout("fillx, insets 5", "[100!][200!]push[100!]", "[]"));
+        setPreferredSize(new Dimension(0, 30));
         setBackground(new Color(245, 245, 245));
-        setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(200, 200, 200)));
+        setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(220, 220, 220)));
 
         Font monoFont = new Font(Font.MONOSPACED, Font.PLAIN, 12);
 
+        // Initialize labels
         userLabel = new JLabel("Not logged in");
         userLabel.setFont(monoFont);
         userLabel.setForeground(Color.DARK_GRAY);
@@ -38,9 +40,15 @@ public class StatusBarPanel extends JPanel {
         clockLabel.setFont(monoFont);
         clockLabel.setForeground(Color.DARK_GRAY);
 
-        add(new JLabel("User:"), "");
-        add(userLabel, "");
-        add(connectionLabel, "grow");
+        // Create containers for better alignment
+        JPanel userContainer = new JPanel(new MigLayout("insets 0"));
+        userContainer.setOpaque(false);
+        userContainer.add(new JLabel("User:"), "");
+        userContainer.add(userLabel, "");
+
+        // Add components with proper constraints
+        add(userContainer, "left");
+        add(connectionLabel, "center");
         add(clockLabel, "right");
 
         startClock();

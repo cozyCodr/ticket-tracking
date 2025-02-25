@@ -1,6 +1,6 @@
 package com.cozycodr.ticket_support.client;
 
-import com.cozycodr.ticket_support.client.swing.ApplicationFrame;
+import com.cozycodr.ticket_support.client.swing.frames.ApplicationFrame;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;

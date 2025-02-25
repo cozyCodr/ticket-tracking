@@ -1,6 +1,7 @@
-package com.cozycodr.ticket_support.client.swing;
+package com.cozycodr.ticket_support.client.swing.panels.auth;
 
 import com.cozycodr.ticket_support.client.service.ClientAuthenticationService;
+import com.cozycodr.ticket_support.client.swing.frames.ApplicationFrame;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;

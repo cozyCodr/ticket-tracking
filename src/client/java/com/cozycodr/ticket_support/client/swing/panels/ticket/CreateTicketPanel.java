@@ -1,10 +1,12 @@
-package com.cozycodr.ticket_support.client.swing;
+package com.cozycodr.ticket_support.client.swing.panels.ticket;
 
 import net.miginfocom.swing.MigLayout;
+import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
 
+@Component
 public class CreateTicketPanel extends JPanel {
     private JTextField titleField;
     private JTextArea descriptionArea;

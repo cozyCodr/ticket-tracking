@@ -1,7 +1,8 @@
-package com.cozycodr.ticket_support.client.swing;
+package com.cozycodr.ticket_support.client.swing.panels.general;
 
 import com.cozycodr.ticket_support.client.event.ApplicationEvent;
 import com.cozycodr.ticket_support.client.service.EventBusService;
+import com.cozycodr.ticket_support.client.swing.panels.ticket.CreateTicketPanel;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
@@ -32,29 +33,25 @@ public class MainPanel extends JPanel {
         initializeUI();
     }
 
+    //
     @PostConstruct
     private void initializeUI() {
-        // Use MigLayout with a proper constraint setup
-        setLayout(new MigLayout("fill, insets 0", "[200!][grow]", "[60!][grow]"));
+        setLayout(new MigLayout("fill, insets 0", "[200!][grow]", "[50!][grow]"));
         setBackground(Color.WHITE);
 
-        // Create and add header
+        // Create components
         JPanel headerPanel = createHeaderPanel();
-
-        // Create and add sidebar
         JPanel sidebarPanel = createSidebarPanel();
-
-        // Configure content panel
         configureContentPanel();
 
-        // Add all panels to the main layout
-        add(headerPanel, "span 2, growx, wrap");  // Header spans both columns
-        add(sidebarPanel, "cell 0 1, growy");     // Sidebar in first column
-        add(contentPanel, "cell 1 1, grow");      // Content in second column
+        // Add components with proper constraints
+        add(headerPanel, "span 2, growx, wrap");
+        add(sidebarPanel, "growy");
+        add(contentPanel, "grow");
     }
 
     private JPanel createHeaderPanel() {
-        JPanel headerPanel = new JPanel(new MigLayout("fillx, insets 10", "[grow][]"));
+        JPanel headerPanel = new JPanel(new MigLayout("fill, insets 8", "[]push[][]", "[]"));
         headerPanel.setBackground(new Color(51, 51, 51));
 
         JLabel titleLabel = new JLabel("IT Support Ticket System");
@@ -67,11 +64,24 @@ public class MainPanel extends JPanel {
         JButton logoutButton = new JButton("Logout");
         styleLogoutButton(logoutButton);
 
-        headerPanel.add(titleLabel, "cell 0 0");
-        headerPanel.add(userLabel, "cell 1 0");
-        headerPanel.add(logoutButton, "cell 2 0");
+        headerPanel.add(titleLabel);
+        headerPanel.add(userLabel);
+        headerPanel.add(logoutButton);
 
         return headerPanel;
+    }
+
+    private JPanel createSidebarPanel() {
+        JPanel sidebar = new JPanel(new MigLayout("fillx, insets 0", "[grow]", "[]0[]0[]0[]"));
+        sidebar.setBackground(new Color(242, 242, 242));
+        sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(220, 220, 220)));
+
+        // Add navigation buttons
+        addNavigationButton(sidebar, "Dashboard");
+        addNavigationButton(sidebar, "Create Ticket");
+        addNavigationButton(sidebar, "My Tickets");
+
+        return sidebar;
     }
 
     private void styleLogoutButton(JButton button) {
@@ -104,17 +114,31 @@ public class MainPanel extends JPanel {
         });
     }
 
-    private JPanel createSidebarPanel() {
-        JPanel sidebar = new JPanel(new MigLayout("fillx, insets 0", "[grow]", "[]"));
-        sidebar.setBackground(new Color(242, 242, 242));
+    private void styleNavigationButton(JButton button) {
+        button.setFocusPainted(false);
+        button.setFont(new Font("Arial", Font.PLAIN, 14));
+        button.setPreferredSize(new Dimension(200, 45));
+        button.setBackground(new Color(242, 242, 242));
+        button.setBorderPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setIconTextGap(15);
+        button.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
 
-        // Add base navigation buttons
-        addNavigationButton(sidebar, "Dashboard");
-        addNavigationButton(sidebar, "Create Ticket");
-        addNavigationButton(sidebar, "My Tickets");
+        // Add hover effect
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent evt) {
+                button.setBackground(new Color(230, 230, 230));
+            }
 
-        return sidebar;
+            @Override
+            public void mouseExited(MouseEvent evt) {
+                button.setBackground(new Color(242, 242, 242));
+            }
+        });
     }
+
 
     private void configureContentPanel() {
         contentPanel.setLayout(new MigLayout("fill, insets 10", "[grow]", "[grow]"));
@@ -143,27 +167,6 @@ public class MainPanel extends JPanel {
 
         panel.add(button, "wrap, growx");
         navigationButtons.put(text, button);
-    }
-
-    private void styleNavigationButton(JButton button) {
-        button.setFocusPainted(false);
-        button.setFont(new Font("Arial", Font.PLAIN, 14));
-        button.setPreferredSize(new Dimension(180, 40));
-        button.setBackground(new Color(242, 242, 242));
-        button.setBorderPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        button.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent evt) {
-                button.setBackground(new Color(230, 230, 230));
-            }
-
-            @Override
-            public void mouseExited(MouseEvent evt) {
-                button.setBackground(new Color(242, 242, 242));
-            }
-        });
     }
 
     private void handleNavigation(String destination) {
