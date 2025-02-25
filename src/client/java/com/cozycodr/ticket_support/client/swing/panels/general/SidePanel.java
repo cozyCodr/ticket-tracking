@@ -1,5 +1,6 @@
 package com.cozycodr.ticket_support.client.swing.panels.general;
 
+import jakarta.annotation.PostConstruct;
 import net.miginfocom.swing.MigLayout;
 import org.springframework.stereotype.Component;
 
@@ -7,25 +8,58 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.function.Consumer;
 
 @Component
 public class SidePanel extends JPanel {
 
+    private Consumer<String> onNavigationSelected;
+
     public SidePanel() {
-        // Vertical navigation using MigLayout
+        // Use MigLayout with fillx and insets; fixed preferred width.
         setLayout(new MigLayout("fillx, insets 10", "[grow]", "[]10[]10[]"));
         setBackground(Color.WHITE);
-        setPreferredSize(new Dimension(250, 0));
+        setPreferredSize(new Dimension(250, 150));
         setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(220, 220, 220)));
+        initPanel();
+    }
 
+    @PostConstruct
+    public void postInit() {
+        // Ensure initialization runs in case @PostConstruct is triggered later.
+        initPanel();
+    }
+
+    private void initPanel() {
+        removeAll();
         // Header label
         JLabel headerLabel = new JLabel("Hahns Ticket Tracking");
         headerLabel.setFont(new Font("Arial", Font.BOLD, 20));
         add(headerLabel, "wrap, align center, gapbottom 20");
 
-        // Navigation buttons (simulate react NavItems)
-        add(createNavButton("My Tickets", true), "growx, wrap");
-        add(createNavButton("Create Ticket", false), "growx, wrap");
+        // Navigation buttons
+        JButton myTicketsBtn = createNavButton("My Tickets", true);
+        myTicketsBtn.addActionListener(e -> {
+            if (onNavigationSelected != null) {
+                onNavigationSelected.accept("MyTickets");
+            }
+        });
+        add(myTicketsBtn, "growx, wrap");
+
+        JButton createTicketBtn = createNavButton("Create Ticket", false);
+        createTicketBtn.addActionListener(e -> {
+            if (onNavigationSelected != null) {
+                onNavigationSelected.accept("CreateTicket");
+            }
+        });
+        add(createTicketBtn, "growx, wrap");
+
+        revalidate();
+        repaint();
+    }
+
+    public void setOnNavigationSelected(Consumer<String> callback) {
+        this.onNavigationSelected = callback;
     }
 
     private JButton createNavButton(String text, boolean active) {
@@ -38,7 +72,6 @@ public class SidePanel extends JPanel {
         button.setBorderPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Hover effect
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {

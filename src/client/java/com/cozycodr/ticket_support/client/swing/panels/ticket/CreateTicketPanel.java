@@ -1,6 +1,9 @@
 package com.cozycodr.ticket_support.client.swing.panels.ticket;
 
+import com.cozycodr.ticket_support.client.service.ClientTicketService;
+import jakarta.annotation.PostConstruct;
 import net.miginfocom.swing.MigLayout;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -8,70 +11,66 @@ import java.awt.*;
 
 @Component
 public class CreateTicketPanel extends JPanel {
+
+    private final ClientTicketService ticketService;
     private JTextField titleField;
     private JTextArea descriptionArea;
-    private JComboBox<String> priorityCombo;
-    private JComboBox<String> categoryCombo;
+    private JButton submitButton;
 
-    public CreateTicketPanel() {
-        setLayout(new MigLayout("fillx, insets 20", "[right][grow]", "[]10[]"));
+    @Autowired
+    public CreateTicketPanel(ClientTicketService ticketService) {
+        this.ticketService = ticketService;
+        initComponents();
+    }
+
+    @PostConstruct
+    private void initComponents() {
+        setLayout(new MigLayout("fill", "[grow]", "[][][grow][]"));
         setBackground(Color.WHITE);
-        initializeComponents();
-        layoutComponents();
-    }
 
-    private void initializeComponents() {
-        // Title
-        titleField = new JTextField(20);
+        JLabel header = new JLabel("New Ticket");
+        header.setFont(new Font("Arial", Font.BOLD, 18));
+        add(header, "wrap");
 
-        // Description
-        descriptionArea = new JTextArea(5, 20);
+        add(new JLabel("Title:"), "wrap");
+        titleField = new JTextField(30);
+        add(titleField, "wrap, growx");
+
+        add(new JLabel("Description:"), "wrap");
+        descriptionArea = new JTextArea(5, 30);
         descriptionArea.setLineWrap(true);
-        descriptionArea.setWrapStyleWord(true);
+        add(new JScrollPane(descriptionArea), "wrap, growx");
 
-        // Priority ComboBox
-        priorityCombo = new JComboBox<>(new String[]{"Low", "Medium", "High"});
-
-        // Category ComboBox
-        categoryCombo = new JComboBox<>(new String[]{"Network", "Hardware", "Software", "Other"});
+        submitButton = new JButton("Create Ticket");
+        submitButton.addActionListener(e -> createNewTicket());
+        add(submitButton, "align center");
     }
 
-    private void layoutComponents() {
-        // Title section
-        add(createSectionLabel("Create New Ticket"), "span 2, center, wrap");
+    private void createNewTicket() {
+        String title = titleField.getText().trim();
+        String description = descriptionArea.getText().trim();
 
-        // Form fields
-        add(createLabel("Title:"), "right");
-        add(titleField, "growx, wrap");
+        if (title.isEmpty() || description.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Title and Description cannot be empty", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-        add(createLabel("Description:"), "right");
-        add(new JScrollPane(descriptionArea), "growx, wrap");
+        String createTicketJson = String.format("{\"title\":\"%s\", \"description\":\"%s\"}", title, description);
 
-        add(createLabel("Priority:"), "right");
-        add(priorityCombo, "growx, wrap");
-
-        add(createLabel("Category:"), "right");
-        add(categoryCombo, "growx, wrap");
-
-        // Submit button
-        JButton submitButton = new JButton("Submit Ticket");
-        submitButton.setBackground(new Color(0, 120, 212));
-        submitButton.setForeground(Color.WHITE);
-        submitButton.setFocusPainted(false);
-
-        add(submitButton, "span 2, center, wrap");
+        ticketService.createTicket(
+                createTicketJson,
+                ticketResponse -> SwingUtilities.invokeLater(() -> {
+                    JOptionPane.showMessageDialog(this, "Ticket created with ID: " + ticketResponse.getId(), "Ticket Created", JOptionPane.INFORMATION_MESSAGE);
+                    clearForm();
+                }),
+                error -> SwingUtilities.invokeLater(() -> {
+                    JOptionPane.showMessageDialog(this, "Error creating ticket: " + error, "Error", JOptionPane.ERROR_MESSAGE);
+                })
+        );
     }
 
-    private JLabel createLabel(String text) {
-        JLabel label = new JLabel(text);
-        label.setFont(new Font("Arial", Font.PLAIN, 14));
-        return label;
-    }
-
-    private JLabel createSectionLabel(String text) {
-        JLabel label = new JLabel(text);
-        label.setFont(new Font("Arial", Font.BOLD, 18));
-        label.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
-        return label;
+    private void clearForm() {
+        titleField.setText("");
+        descriptionArea.setText("");
     }
 }

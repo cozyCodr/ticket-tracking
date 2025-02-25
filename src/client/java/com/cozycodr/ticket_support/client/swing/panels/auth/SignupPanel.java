@@ -6,6 +6,7 @@ import com.cozycodr.ticket_support.client.enums.Role;
 import com.cozycodr.ticket_support.client.service.ClientAuthenticationService;
 import com.cozycodr.ticket_support.client.swing.frames.ApplicationFrame;
 import com.cozycodr.ticket_support.client.utils.DialogUtils;
+import com.cozycodr.ticket_support.client.utils.UIConstants;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,11 +99,11 @@ public class SignupPanel extends JPanel {
         panel.setOpaque(false);
 
         JLabel textLabel = new JLabel("Already have an account?");
-        textLabel.setFont(ApplicationFrame.REGULAR_FONT);
+        textLabel.setFont(UIConstants.REGULAR_FONT);
 
         JLabel loginLink = new JLabel("Login");
-        loginLink.setFont(ApplicationFrame.REGULAR_FONT);
-        loginLink.setForeground(ApplicationFrame.PRIMARY_COLOR);
+        loginLink.setFont(UIConstants.REGULAR_FONT);
+        loginLink.setForeground(UIConstants.PRIMARY_COLOR);
         loginLink.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         // Add underline on hover

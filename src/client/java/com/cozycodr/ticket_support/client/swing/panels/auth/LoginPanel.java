@@ -2,6 +2,7 @@ package com.cozycodr.ticket_support.client.swing.panels.auth;
 
 import com.cozycodr.ticket_support.client.service.ClientAuthenticationService;
 import com.cozycodr.ticket_support.client.swing.frames.ApplicationFrame;
+import com.cozycodr.ticket_support.client.utils.UIConstants;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
@@ -62,13 +63,13 @@ public class LoginPanel extends JPanel {
 
         // Logo (placeholder if image not available)
         JLabel logoLabel = new JLabel("IT Support", SwingConstants.CENTER);
-        logoLabel.setFont(ApplicationFrame.TITLE_FONT);
-        logoLabel.setForeground(ApplicationFrame.PRIMARY_COLOR);
+        logoLabel.setFont(UIConstants.TITLE_FONT);
+        logoLabel.setForeground(UIConstants.PRIMARY_COLOR);
 
         // Title
         JLabel titleLabel = new JLabel("Ticket System", SwingConstants.CENTER);
-        titleLabel.setFont(ApplicationFrame.TITLE_FONT);
-        titleLabel.setForeground(ApplicationFrame.PRIMARY_COLOR);
+        titleLabel.setFont(UIConstants.TITLE_FONT);
+        titleLabel.setForeground(UIConstants.PRIMARY_COLOR);
 
         panel.add(logoLabel, "grow, wrap, align center");
         panel.add(titleLabel, "grow, wrap, align center");
@@ -110,11 +111,11 @@ public class LoginPanel extends JPanel {
         panel.setOpaque(false);
 
         JLabel textLabel = new JLabel("Don't have an account?");
-        textLabel.setFont(ApplicationFrame.REGULAR_FONT);
+        textLabel.setFont(UIConstants.REGULAR_FONT);
 
         JLabel signupLink = new JLabel("Sign Up");
-        signupLink.setFont(ApplicationFrame.REGULAR_FONT);
-        signupLink.setForeground(ApplicationFrame.PRIMARY_COLOR);
+        signupLink.setFont(UIConstants.REGULAR_FONT);
+        signupLink.setForeground(UIConstants.PRIMARY_COLOR);
         signupLink.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         // Add underline on hover
@@ -143,7 +144,7 @@ public class LoginPanel extends JPanel {
     }
 
     private void styleTextField(JTextField field) {
-        field.setFont(ApplicationFrame.REGULAR_FONT);
+        field.setFont(UIConstants.REGULAR_FONT);
         field.setMargin(new Insets(8, 10, 8, 10));
     }
 
@@ -151,7 +152,7 @@ public class LoginPanel extends JPanel {
         JButton button = new JButton("Login");
         button.setFont(new Font("Arial", Font.BOLD, 14));
         button.setForeground(Color.WHITE);
-        button.setBackground(ApplicationFrame.PRIMARY_COLOR);
+        button.setBackground(UIConstants.PRIMARY_COLOR);
         button.setFocusPainted(false);
         button.setBorderPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -160,11 +161,11 @@ public class LoginPanel extends JPanel {
         // Add hover effect
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(ApplicationFrame.PRIMARY_COLOR.darker());
+                button.setBackground(UIConstants.PRIMARY_COLOR.darker());
             }
 
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(ApplicationFrame.PRIMARY_COLOR);
+                button.setBackground(UIConstants.PRIMARY_COLOR);
             }
         });
 

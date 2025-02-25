@@ -32,9 +32,9 @@ public class TicketController {
     )
     public ResponseEntity<ApiResponseBody<TicketResponse>> createTicket(
             @Valid @RequestBody CreateTicketRequest request,
-            @RequestHeader("X-User-Id") UUID userId
+            @RequestHeader("Authorization") String authHeader
     ){
-        return ticketService.createTicket(request, userId);
+        return ticketService.createTicket(request, authHeader);
     }
 
     @GetMapping
@@ -98,10 +98,10 @@ public class TicketController {
             description = "Fetches tickets opened by specific user"
     )
     public ResponseEntity<ApiResponseBody<TicketDataResponse<TicketListResponse>>> getTicketsByCreator(
-            @RequestHeader(name = "X-User-Id") UUID userId,
+            @RequestHeader("Authorization") String authHeader,
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size
     ){
-        return ticketService.getTicketsByCreator(userId, page, size);
+        return ticketService.getTicketsByCreator(authHeader, page, size);
     }
 }

@@ -23,10 +23,12 @@ public class MainPanel extends JPanel {
     private final Map<String, JButton> navigationButtons;
     private boolean isITSupport = false;
     private final EventBusService eventBus;
+    private final CreateTicketPanel createTicketPanel;
 
     @Autowired
-    public MainPanel(EventBusService eventBus) {
+    public MainPanel(EventBusService eventBus, CreateTicketPanel createTicketPanel) {
         this.eventBus = eventBus;
+        this.createTicketPanel = createTicketPanel;
         this.contentPanel = new JPanel();
         this.userLabel = new JLabel();
         this.navigationButtons = new HashMap<>();
@@ -192,7 +194,7 @@ public class MainPanel extends JPanel {
     }
 
     private void showCreateTicket() {
-        contentPanel.add(new CreateTicketPanel(), "grow");
+        contentPanel.add(createTicketPanel, "grow");
     }
 
     private void showMyTickets() {

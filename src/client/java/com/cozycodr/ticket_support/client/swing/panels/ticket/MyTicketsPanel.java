@@ -28,30 +28,38 @@ public class MyTicketsPanel extends JPanel {
     private void initializeUI() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
-
         JScrollPane scrollPane = new JScrollPane(ticketsListPanel);
         add(scrollPane, BorderLayout.CENTER);
     }
 
     public void refreshTickets(String username) {
-        List<TicketResponse> tickets = ticketService.fetchMyTickets(1, 10, null, null);
-        ticketsListPanel.removeAll();
-
-        if (tickets.isEmpty()) {
-            ticketsListPanel.add(new JLabel("No tickets found for user: " + username));
-        } else {
-            for (TicketResponse ticket : tickets) {
-                JPanel ticketPanel = new JPanel(new MigLayout("fillx, insets 5", "[grow]", "[]"));
-                ticketPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-                ticketPanel.setBackground(Color.WHITE);
-                JLabel titleLabel = new JLabel("Ticket #" + ticket.getId() + ": " + ticket.getTitle());
-                JLabel descLabel = new JLabel("<html>" + ticket.getDescription() + "</html>");
-                ticketPanel.add(titleLabel, "wrap");
-                ticketPanel.add(descLabel, "growx");
-                ticketsListPanel.add(ticketPanel, "growx, wrap");
-            }
-        }
-        ticketsListPanel.revalidate();
-        ticketsListPanel.repaint();
+        ticketService.fetchMyTickets(1, 10,
+                ticketList -> SwingUtilities.invokeLater(() -> {
+                    ticketsListPanel.removeAll();
+                    List<TicketResponse> tickets = ticketList.getTickets();
+                    if (tickets == null || tickets.isEmpty()) {
+                        ticketsListPanel.add(new JLabel("No tickets found for: " + username), "wrap");
+                    } else {
+                        for (TicketResponse ticket : tickets) {
+                            JPanel ticketPanel = new JPanel(new MigLayout("fillx, insets 5", "[grow]", "[]"));
+                            ticketPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+                            ticketPanel.setBackground(Color.WHITE);
+                            JLabel titleLabel = new JLabel("Ticket #" + ticket.getId() + ": " + ticket.getTitle());
+                            JLabel descLabel = new JLabel("<html>" + ticket.getDescription() + "</html>");
+                            ticketPanel.add(titleLabel, "wrap");
+                            ticketPanel.add(descLabel, "growx");
+                            ticketsListPanel.add(ticketPanel, "growx, wrap");
+                        }
+                    }
+                    ticketsListPanel.revalidate();
+                    ticketsListPanel.repaint();
+                }),
+                errorMessage -> SwingUtilities.invokeLater(() -> {
+                    ticketsListPanel.removeAll();
+                    ticketsListPanel.add(new JLabel("Error loading tickets: " + errorMessage), "wrap");
+                    ticketsListPanel.revalidate();
+                    ticketsListPanel.repaint();
+                })
+        );
     }
 }

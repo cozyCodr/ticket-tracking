@@ -44,11 +44,14 @@ public class TicketService {
     /**
      * Creates a New Ticket
      * @param request contains details of ticket
-     * @param userId id of user creating the ticket
+     * @param authHeader authorization header
      * @return TicketResponse, details of newly created ticket
      */
     @Transactional
-    public ResponseEntity<ApiResponseBody<TicketResponse>> createTicket(CreateTicketRequest request, UUID userId) {
+    public ResponseEntity<ApiResponseBody<TicketResponse>> createTicket(CreateTicketRequest request, String authHeader) {
+
+        UUID userId = UUID.fromString(jwtService.extractUserIdFromAuthHeader(authHeader));
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
 
@@ -102,13 +105,15 @@ public class TicketService {
 
     /**
      * Fetches tickets created by a user
-     * @param userId user id whose tickets to fetch
+     * @param authHeader authorizationHeader
      * @param page page number of tickets, default is 1
      * @param size size of tickets per page, default is 10
      * @return a list of the users tickets
      */
     @Transactional(readOnly = true)
-    public ResponseEntity<ApiResponseBody<TicketDataResponse<TicketListResponse>>> getTicketsByCreator(UUID userId, int page, int size){
+    public ResponseEntity<ApiResponseBody<TicketDataResponse<TicketListResponse>>> getTicketsByCreator(String authHeader, int page, int size){
+
+        UUID userId = UUID.fromString(jwtService.extractUserIdFromAuthHeader(authHeader));
 
         Pageable pageable = PageRequest.of((page - 1), size);
         User user = userRepository.findById(userId)

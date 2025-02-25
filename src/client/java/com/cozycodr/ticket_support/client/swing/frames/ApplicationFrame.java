@@ -5,8 +5,8 @@ import com.cozycodr.ticket_support.client.dto.LoginRequest;
 import com.cozycodr.ticket_support.client.service.ClientAuthenticationService;
 import com.cozycodr.ticket_support.client.service.EventBusService;
 import com.cozycodr.ticket_support.client.swing.panels.auth.LoginPanel;
-import com.cozycodr.ticket_support.client.swing.panels.general.MainViewPanel;
 import com.cozycodr.ticket_support.client.swing.panels.auth.SignupPanel;
+import com.cozycodr.ticket_support.client.swing.panels.general.MainViewPanel;
 import com.cozycodr.ticket_support.client.utils.AuthManager;
 import com.cozycodr.ticket_support.client.utils.DialogUtils;
 import jakarta.annotation.PostConstruct;
@@ -31,15 +31,10 @@ public class ApplicationFrame extends JFrame {
     private final LoginPanel loginPanel;
     private final SignupPanel signupPanel;
     private final MainViewPanel mainViewPanel;
-
     private final ClientAuthenticationService authService;
     private final AuthManager authManager;
     private final EventBusService eventBus;
     private final JLabel clockLabel;
-
-    public static final Color PRIMARY_COLOR = new Color(0, 120, 212);
-    public static final Font TITLE_FONT = new Font("Arial", Font.BOLD, 24);
-    public static final Font REGULAR_FONT = new Font("Arial", Font.PLAIN, 14);
 
     @Autowired
     public ApplicationFrame(LoginPanel loginPanel, SignupPanel signupPanel, MainViewPanel mainViewPanel,
@@ -53,7 +48,6 @@ public class ApplicationFrame extends JFrame {
         this.mainCardPanel = new JPanel(cardLayout);
         this.clockLabel = new JLabel();
         this.authManager = authManager;
-
         initializeUI();
         setupClock();
     }
@@ -65,11 +59,9 @@ public class ApplicationFrame extends JFrame {
         setMinimumSize(new Dimension(1024, 768));
         setLayout(new MigLayout("fill, insets 0", "[grow]", "[grow]"));
 
-        // Login panel handlers
+        // Configure login/signup panels.
         loginPanel.setLoginHandler(this::handleLogin);
         loginPanel.setSignupNavigationHandler(() -> cardLayout.show(mainCardPanel, "SIGNUP"));
-
-        // Signup panel handlers
         signupPanel.setCallback(new SignupPanel.SignupCallback() {
             @Override
             public void onSignupSuccess(AuthDataResponse authResponse) {
@@ -80,14 +72,12 @@ public class ApplicationFrame extends JFrame {
             }
             @Override
             public void onSignupError(String message) {
-                SwingUtilities.invokeLater(() -> {
-                    DialogUtils.showErrorDialog(ApplicationFrame.this, message, "Signup Error");
-                });
+                SwingUtilities.invokeLater(() ->
+                        DialogUtils.showErrorDialog(ApplicationFrame.this, message, "Signup Error"));
             }
         });
         signupPanel.setLoginNavigationHandler(() -> cardLayout.show(mainCardPanel, "LOGIN"));
 
-        // Add panels to card layout
         mainCardPanel.add(loginPanel, "LOGIN");
         mainCardPanel.add(signupPanel, "SIGNUP");
         mainCardPanel.add(mainViewPanel, "MAIN");
@@ -97,6 +87,8 @@ public class ApplicationFrame extends JFrame {
 
         cardLayout.show(mainCardPanel, "LOGIN");
         setLocationRelativeTo(null);
+        pack();
+        setVisible(true);
     }
 
     private void handleLogin(String username, String password) {
@@ -104,23 +96,19 @@ public class ApplicationFrame extends JFrame {
                 .username(username)
                 .password(password)
                 .build();
-
         authService.login(request,
                 response -> SwingUtilities.invokeLater(() -> {
-                    // Store the token from the response
                     authManager.setAuthToken(response.getToken());
                     showMainView(response);
                 }),
-                errorMessage -> SwingUtilities.invokeLater(() -> {
-                    DialogUtils.showErrorDialog(ApplicationFrame.this, errorMessage, "Login Error");
-                })
+                errorMessage -> SwingUtilities.invokeLater(() ->
+                        DialogUtils.showErrorDialog(ApplicationFrame.this, errorMessage, "Login Error"))
         );
     }
 
     private void showMainView(AuthDataResponse user) {
         currentUser = user;
         mainViewPanel.setCurrentUser(user.getUsername());
-        mainViewPanel.setITSupport("IT_SUPPORT".equals(user.getRole()));
         cardLayout.show(mainCardPanel, "MAIN");
     }
 
@@ -137,9 +125,7 @@ public class ApplicationFrame extends JFrame {
 
     public void logout() {
         currentUser = null;
-        // Optionally clear token now that the user logs out
         authManager.setAuthToken(null);
         cardLayout.show(mainCardPanel, "LOGIN");
     }
-
 }

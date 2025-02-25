@@ -35,8 +35,7 @@ public class ClientTicketService {
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final AuthManager authManager;
 
-    // Base URL for the API endpoints, e.g., "http://localhost:8080/api"
-    @Value("${client.api.base-url}")
+    @Value("${app.api.base-url}")
     private String baseUrl;
 
     @Autowired
@@ -55,20 +54,15 @@ public class ClientTicketService {
      * @param size      The number of tickets per page.
      * @param onSuccess Consumer that receives an array of TicketResponse objects on success.
      * @param onError   Consumer that receives an error message string if fetching fails.
-     * @return
+     * @return list of tickets
      */
     public List<TicketResponse> fetchMyTickets(int page, int size, Consumer<TicketListResponse> onSuccess, Consumer<String> onError) {
-
-        // todo: extract auth header
-        String authHeader = "";
-
         // Build the endpoint URL with pagination query parameters.
         String url = String.format("%s/tickets/user?page=%d&size=%d", baseUrl, page, size);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                // Set the required header for user information.
-                .header("Authorization", authHeader)
+                .header("Authorization", authManager.getAuthHeader())
                 .GET()
                 .build();
 
@@ -104,17 +98,16 @@ public class ClientTicketService {
      * Create a new ticket via the backend API.
      *
      * @param createTicketJson JSON string representing the create ticket request.
-     * @param userId           The UUID of the user creating the ticket.
      * @param onSuccess        Consumer with the response JSON on success.
      * @param onError          Consumer with an error message on failure.
      */
-    public void createTicket(String createTicketJson, UUID userId, Consumer<TicketResponse> onSuccess, Consumer<String> onError) {
+    public void createTicket(String createTicketJson, Consumer<TicketResponse> onSuccess, Consumer<String> onError) {
         String url = baseUrl + "/tickets";
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .header("Content-Type", "application/json")
-                .header("X-User-Id", userId.toString())
+                .header("Authorization", authManager.getAuthHeader())
                 .POST(HttpRequest.BodyPublishers.ofString(createTicketJson))
                 .build();
 
@@ -155,6 +148,7 @@ public class ClientTicketService {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
+                .header("Authorization", authManager.getAuthHeader())
                 .GET()
                 .build();
 
@@ -194,6 +188,7 @@ public class ClientTicketService {
         String url = String.format("%s/tickets?page=%d&size=%d", baseUrl, page, size);
 
         HttpRequest request = HttpRequest.newBuilder()
+                .header("Authorization", authManager.getAuthHeader())
                 .uri(URI.create(url))
                 .GET()
                 .build();
