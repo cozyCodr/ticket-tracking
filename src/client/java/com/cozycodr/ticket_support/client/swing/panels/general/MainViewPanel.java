@@ -11,46 +11,49 @@ import java.awt.*;
 
 @Component
 public class MainViewPanel extends JPanel {
-
     private final SidePanel sidePanel;
-    private final JPanel cardPanel; // main content area using CardLayout
+    private final JPanel cardPanel;
     private final CardLayout cardLayout;
     private final CreateTicketPanel createTicketPanel;
     private final MyTicketsPanel myTicketsPanel;
+    private String currentUsername;
 
     private static final String CREATE_TICKET_CARD = "CreateTicket";
     private static final String MY_TICKETS_CARD = "MyTickets";
 
-    // Beans are injected by Spring.
     public MainViewPanel(SidePanel sidePanel, CreateTicketPanel createTicketPanel, MyTicketsPanel myTicketsPanel) {
-        // Using MigLayout: fixed width for side panel, remaining area for main content.
         setLayout(new MigLayout("fill, insets 0", "[250!][grow]", "[grow]"));
         this.sidePanel = sidePanel;
         this.createTicketPanel = createTicketPanel;
         this.myTicketsPanel = myTicketsPanel;
-        cardLayout = new CardLayout();
-        cardPanel = new JPanel(cardLayout);
+        this.cardLayout = new CardLayout();
+        this.cardPanel = new JPanel(cardLayout);
+        cardPanel.setBackground(Color.WHITE);
         initCards();
     }
 
     @PostConstruct
     public void init() {
-        // Set up navigation callback.
         sidePanel.setOnNavigationSelected(navItem -> {
-            if ("MyTickets".equals(navItem)) {
+            if (MY_TICKETS_CARD.equals(navItem)) {
                 cardLayout.show(cardPanel, MY_TICKETS_CARD);
-                myTicketsPanel.refreshTickets(""); // refresh tickets as needed
-            } else if ("CreateTicket".equals(navItem)) {
+                if (currentUsername != null) {
+                    myTicketsPanel.refreshTickets(currentUsername);
+                }
+            } else if (CREATE_TICKET_CARD.equals(navItem)) {
                 cardLayout.show(cardPanel, CREATE_TICKET_CARD);
             }
-            // Ensure the card panel is updated.
+            sidePanel.setActiveButton(navItem);
             cardPanel.revalidate();
             cardPanel.repaint();
         });
+
         add(sidePanel, "growy");
         add(cardPanel, "grow");
-        // Set default view to "My Tickets" (or change to CREATE_TICKET_CARD if desired)
+
+        // Set default view to My Tickets
         cardLayout.show(cardPanel, MY_TICKETS_CARD);
+        sidePanel.setActiveButton(MY_TICKETS_CARD);
     }
 
     private void initCards() {
@@ -59,11 +62,11 @@ public class MainViewPanel extends JPanel {
     }
 
     public void setCurrentUser(String username) {
-        // Passing the username to refresh the tickets.
+        this.currentUsername = username;
         myTicketsPanel.refreshTickets(username);
     }
 
     public void setITSupport(boolean isITSupport) {
-        // Optionally update UI as needed.
+        // Implement IT support specific functionality if needed
     }
 }

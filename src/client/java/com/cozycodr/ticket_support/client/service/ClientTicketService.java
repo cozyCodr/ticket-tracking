@@ -76,7 +76,7 @@ public class ClientTicketService {
                             ApiResponseBody<TicketDataResponse<TicketListResponse>> body = objectMapper.readValue(response.body(), ticketListTypeRef);
 
                             // Fetch Ticket List
-                            TicketListResponse ticketList = body.data().getTickets();
+                            TicketListResponse ticketList = body.getData().getTickets();
                             onSuccess.accept(ticketList);
                         } catch(IOException e) {
                             log.error("Error parsing tickets response", e);
@@ -118,7 +118,7 @@ public class ClientTicketService {
                             TypeReference<ApiResponseBody<TicketResponse>> ticketTypeRef = new TypeReference<>() {};
                             ApiResponseBody<TicketResponse> body = objectMapper.readValue(response.body(), ticketTypeRef);
 
-                            TicketResponse ticket = body.data();
+                            TicketResponse ticket = body.getData();
                             onSuccess.accept(ticket);
                         } catch (IOException e) {
                             log.error("Error parsing create ticket response", e);
@@ -159,7 +159,7 @@ public class ClientTicketService {
                             TypeReference<ApiResponseBody<SingleTicketResponse>> ticketTypeRef = new TypeReference<>() {};
                             ApiResponseBody<SingleTicketResponse> body = objectMapper.readValue(response.body(), ticketTypeRef);
 
-                            TicketResponse ticket = body.data().getTicket();
+                            TicketResponse ticket = body.getData().getTicket();
                             onSuccess.accept(ticket);
                         } catch (IOException e) {
                             log.error("Error parsing ticket details", e);

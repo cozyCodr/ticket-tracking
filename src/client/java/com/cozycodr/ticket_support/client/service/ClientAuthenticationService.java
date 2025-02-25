@@ -56,8 +56,8 @@ public class ClientAuthenticationService {
                                         response.body(),
                                         authDataTypeRef
                                 );
-                                if (authResponse.data() != null) {
-                                    onSuccess.accept(authResponse.data());
+                                if (authResponse.getData() != null) {
+                                    onSuccess.accept(authResponse.getData());
                                 } else {
                                     log.error("No data in response");
                                     onError.accept("No data in response");
@@ -105,8 +105,8 @@ public class ClientAuthenticationService {
                                         response.body(),
                                         authDataTypeRef
                                 );
-                                if (authResponse.data() != null) {
-                                    onSuccess.accept(authResponse.data());
+                                if (authResponse.getData() != null) {
+                                    onSuccess.accept(authResponse.getData());
                                 } else {
 
                                     onError.accept(response.body());

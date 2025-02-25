@@ -50,9 +50,9 @@ public class TicketService {
     @Transactional
     public ResponseEntity<ApiResponseBody<TicketResponse>> createTicket(CreateTicketRequest request, String authHeader) {
 
-        UUID userId = UUID.fromString(jwtService.extractUserIdFromAuthHeader(authHeader));
+        String username = jwtService.extractUsernameFromAuthHeader(authHeader);
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
 
         Ticket newTicket = Ticket.builder()
@@ -112,11 +112,12 @@ public class TicketService {
      */
     @Transactional(readOnly = true)
     public ResponseEntity<ApiResponseBody<TicketDataResponse<TicketListResponse>>> getTicketsByCreator(String authHeader, int page, int size){
-
-        UUID userId = UUID.fromString(jwtService.extractUserIdFromAuthHeader(authHeader));
+        System.out.println("Extracting user name");
+        String username = jwtService.extractUsernameFromAuthHeader(authHeader);
+        System.out.println("Done");
 
         Pageable pageable = PageRequest.of((page - 1), size);
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Page<Ticket> tickets = ticketRepository.findTicketsByRaisedBy(user, pageable);
@@ -153,8 +154,8 @@ public class TicketService {
     public ResponseEntity<ApiResponseBody<SingleCommentResponse>> addCommentTicket(UUID ticketId, AddCommentRequest body, String authHeader) {
 
         // Get User ID from auth Header and Fetch User
-        UUID userId = UUID.fromString(jwtService.extractUserIdFromAuthHeader(authHeader));
-        User user = userRepository.findById(userId)
+        String username = jwtService.extractUsernameFromAuthHeader(authHeader);
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid User ID"));
 
         Ticket ticket = ticketRepository.findById(ticketId)
@@ -197,8 +198,8 @@ public class TicketService {
         TicketStatus beforeStatus;
 
         // Get User ID from auth Header and Fetch User
-        UUID userId = UUID.fromString(jwtService.extractUserIdFromAuthHeader(authHeader));
-        User user = userRepository.findById(userId)
+        String username = jwtService.extractUsernameFromAuthHeader(authHeader);
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid User ID"));
 
         Ticket ticket = ticketRepository.findById(ticketId)

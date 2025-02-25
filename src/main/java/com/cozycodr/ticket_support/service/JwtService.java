@@ -23,13 +23,13 @@ public class JwtService {
     @Value("${spring.security.jwt.expiration}")
     private Long expiration;
 
-    public String extractUsername(String token){
-        return extractClaim(token, Claims::getSubject);
+    public String extractUsernameFromAuthHeader(String authHeader){
+        final String jwt = authHeader.substring(7);
+        return extractUsername(jwt);
     }
 
-    public String extractUserIdFromAuthHeader(String authHeader){
-        String token = authHeader.substring(7);
-        return extractClaim(token, Claims::getId);
+    public String extractUsername(String token){
+        return extractClaim(token, Claims::getSubject);
     }
 
     public String generateToken(UserDetails userDetails){
@@ -68,7 +68,7 @@ public class JwtService {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
-                .parseClaimsJws(token)
+                .parseClaimsJws(token.trim())
                 .getBody();
     }
 

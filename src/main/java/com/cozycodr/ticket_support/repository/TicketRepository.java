@@ -20,6 +20,6 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
 
 
     // Optional: Find tickets by creator with pagination
-    @Query("SELECT t FROM Ticket t WHERE t.raisedBy = :createdBy ORDER BY t.createdDate DESC")
+    @Query("SELECT t FROM Ticket t WHERE t.raisedBy = :user ORDER BY t.createdDate DESC")
     Page<Ticket> findTicketsByRaisedBy(User user, Pageable pageable);
 }
