@@ -2,11 +2,13 @@ package com.cozycodr.ticket_support.client.swing.frames;
 
 import com.cozycodr.ticket_support.client.dto.AuthDataResponse;
 import com.cozycodr.ticket_support.client.dto.LoginRequest;
+import com.cozycodr.ticket_support.client.event.ApplicationEvent;
 import com.cozycodr.ticket_support.client.service.ClientAuthenticationService;
 import com.cozycodr.ticket_support.client.service.EventBusService;
 import com.cozycodr.ticket_support.client.swing.panels.auth.LoginPanel;
 import com.cozycodr.ticket_support.client.swing.panels.auth.SignupPanel;
 import com.cozycodr.ticket_support.client.swing.panels.general.MainViewPanel;
+import com.cozycodr.ticket_support.client.swing.panels.ticket.MyTicketsPanel;
 import com.cozycodr.ticket_support.client.utils.AuthManager;
 import com.cozycodr.ticket_support.client.utils.DialogUtils;
 import jakarta.annotation.PostConstruct;
@@ -31,6 +33,7 @@ public class ApplicationFrame extends JFrame {
     private final LoginPanel loginPanel;
     private final SignupPanel signupPanel;
     private final MainViewPanel mainViewPanel;
+    private final MyTicketsPanel myTicketsPanel;
     private final ClientAuthenticationService authService;
     private final AuthManager authManager;
     private final EventBusService eventBus;
@@ -38,10 +41,13 @@ public class ApplicationFrame extends JFrame {
 
     @Autowired
     public ApplicationFrame(LoginPanel loginPanel, SignupPanel signupPanel, MainViewPanel mainViewPanel,
-                            EventBusService eventBus, ClientAuthenticationService authService, AuthManager authManager) {
+                            EventBusService eventBus, ClientAuthenticationService authService,
+                            AuthManager authManager, MyTicketsPanel myTicketsPanel
+    ) {
         this.loginPanel = loginPanel;
         this.signupPanel = signupPanel;
         this.mainViewPanel = mainViewPanel;
+        this.myTicketsPanel = myTicketsPanel;
         this.eventBus = eventBus;
         this.authService = authService;
         this.cardLayout = new CardLayout();
@@ -50,7 +56,16 @@ public class ApplicationFrame extends JFrame {
         this.authManager = authManager;
         initializeUI();
         setupClock();
+        setupEventListeners();
     }
+
+    private void setupEventListeners() {
+        // Subscribe to logout events
+        eventBus.subscribe(ApplicationEvent.LOGOUT, event -> {
+            SwingUtilities.invokeLater(this::logout);
+        });
+    }
+
 
     @PostConstruct
     private void initializeUI() {
@@ -96,19 +111,28 @@ public class ApplicationFrame extends JFrame {
                 .username(username)
                 .password(password)
                 .build();
+
         authService.login(request,
                 response -> SwingUtilities.invokeLater(() -> {
                     authManager.setAuthToken(response.getToken());
-                    showMainView(response);
+                    this.currentUser = response;
+
+                    // Set the user context before showing main view
+                    myTicketsPanel.setCurrentUser(response);
+                    mainViewPanel.setCurrentUser(response.getUsername());
+                    mainViewPanel.updateUserRole(response.getRole());
+
+                    // Show main view
+                    cardLayout.show(mainCardPanel, "MAIN");
                 }),
                 errorMessage -> SwingUtilities.invokeLater(() ->
-                        DialogUtils.showErrorDialog(ApplicationFrame.this, errorMessage, "Login Error"))
+                        DialogUtils.showErrorDialog(this, errorMessage, "Login Error"))
         );
     }
-
     private void showMainView(AuthDataResponse user) {
         currentUser = user;
         mainViewPanel.setCurrentUser(user.getUsername());
+        mainViewPanel.updateUserRole(user.getRole());
         cardLayout.show(mainCardPanel, "MAIN");
     }
 
@@ -127,5 +151,12 @@ public class ApplicationFrame extends JFrame {
         currentUser = null;
         authManager.setAuthToken(null);
         cardLayout.show(mainCardPanel, "LOGIN");
+        loginPanel.resetFields(); // Add this method to LoginPanel if not exists
+
+        // Reset any necessary state in the panels
+        mainViewPanel.reset(); // Add this method to MainViewPanel if needed
+
+        revalidate();
+        repaint();
     }
 }

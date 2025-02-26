@@ -267,6 +267,7 @@ public class TicketService {
                 .priority(ticket.getPriority())
                 .status(ticket.getStatus())
                 .category(ticket.getCategory())
+                .createdDate(ticket.getCreatedDate())
                 .build();
     }
 
@@ -283,6 +284,7 @@ public class TicketService {
                 .status(ticket.getStatus())
                 .category(ticket.getCategory())
                 .last10Comments(last10comments)
+                .createdDate(ticket.getCreatedDate())
                 .build();
     }
 

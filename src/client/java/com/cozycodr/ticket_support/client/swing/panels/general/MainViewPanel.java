@@ -17,6 +17,7 @@ public class MainViewPanel extends JPanel {
     private final CreateTicketPanel createTicketPanel;
     private final MyTicketsPanel myTicketsPanel;
     private String currentUsername;
+    private String currentCard;
 
     private static final String CREATE_TICKET_CARD = "CreateTicket";
     private static final String MY_TICKETS_CARD = "MyTickets";
@@ -28,7 +29,12 @@ public class MainViewPanel extends JPanel {
         this.myTicketsPanel = myTicketsPanel;
         this.cardLayout = new CardLayout();
         this.cardPanel = new JPanel(cardLayout);
+        this.currentCard = MY_TICKETS_CARD;
         cardPanel.setBackground(Color.WHITE);
+
+        // Set preferred size for the card panel
+        cardPanel.setPreferredSize(new Dimension(600, 400));
+
         initCards();
     }
 
@@ -37,11 +43,13 @@ public class MainViewPanel extends JPanel {
         sidePanel.setOnNavigationSelected(navItem -> {
             if (MY_TICKETS_CARD.equals(navItem)) {
                 cardLayout.show(cardPanel, MY_TICKETS_CARD);
+                currentCard = MY_TICKETS_CARD;
                 if (currentUsername != null) {
                     myTicketsPanel.refreshTickets(currentUsername);
                 }
             } else if (CREATE_TICKET_CARD.equals(navItem)) {
                 cardLayout.show(cardPanel, CREATE_TICKET_CARD);
+                currentCard = CREATE_TICKET_CARD;
             }
             sidePanel.setActiveButton(navItem);
             cardPanel.revalidate();
@@ -53,6 +61,7 @@ public class MainViewPanel extends JPanel {
 
         // Set default view to My Tickets
         cardLayout.show(cardPanel, MY_TICKETS_CARD);
+        currentCard = MY_TICKETS_CARD;
         sidePanel.setActiveButton(MY_TICKETS_CARD);
     }
 
@@ -63,10 +72,27 @@ public class MainViewPanel extends JPanel {
 
     public void setCurrentUser(String username) {
         this.currentUsername = username;
-        myTicketsPanel.refreshTickets(username);
+        SwingUtilities.invokeLater(() -> {
+            if (cardPanel.isVisible()) {
+                myTicketsPanel.refreshTickets(username);
+            }
+        });
     }
 
-    public void setITSupport(boolean isITSupport) {
-        // Implement IT support specific functionality if needed
+    public void updateUserRole(String role) {
+        sidePanel.setUserRole(role);
+        // If not employee and currently on create ticket view, switch to tickets view
+        if (!"EMPLOYEE".equals(role) && CREATE_TICKET_CARD.equals(currentCard)) {
+            cardLayout.show(cardPanel, MY_TICKETS_CARD);
+            currentCard = MY_TICKETS_CARD;
+            sidePanel.setActiveButton(MY_TICKETS_CARD);
+        }
+    }
+
+    public void reset() {
+        // Reset state when logging out
+        currentUsername = null;
+        cardLayout.show(cardPanel, MY_TICKETS_CARD);
+        sidePanel.setActiveButton(MY_TICKETS_CARD);
     }
 }

@@ -3,11 +3,12 @@ package com.cozycodr.ticket_support.client.service;
 import com.cozycodr.ticket_support.client.config.ObjectMapperConfig;
 import com.cozycodr.ticket_support.client.dto.ApiResponseBody;
 import com.cozycodr.ticket_support.client.dto.PageResponse;
-import com.cozycodr.ticket_support.client.dto.ticket.SingleTicketResponse;
-import com.cozycodr.ticket_support.client.dto.ticket.TicketDataResponse;
-import com.cozycodr.ticket_support.client.dto.ticket.TicketListResponse;
-import com.cozycodr.ticket_support.client.dto.ticket.TicketResponse;
+import com.cozycodr.ticket_support.client.dto.comment.AddCommentRequest;
+import com.cozycodr.ticket_support.client.dto.comment.SingleCommentResponse;
+import com.cozycodr.ticket_support.client.dto.ticket.*;
+import com.cozycodr.ticket_support.client.enums.TicketStatus;
 import com.cozycodr.ticket_support.client.utils.AuthManager;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,7 +23,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -54,9 +54,8 @@ public class ClientTicketService {
      * @param size      The number of tickets per page.
      * @param onSuccess Consumer that receives an array of TicketResponse objects on success.
      * @param onError   Consumer that receives an error message string if fetching fails.
-     * @return list of tickets
      */
-    public List<TicketResponse> fetchMyTickets(int page, int size, Consumer<TicketListResponse> onSuccess, Consumer<String> onError) {
+    public void fetchMyTickets(int page, int size, Consumer<TicketListResponse> onSuccess, Consumer<String> onError) {
         // Build the endpoint URL with pagination query parameters.
         String url = String.format("%s/tickets/user?page=%d&size=%d", baseUrl, page, size);
 
@@ -91,24 +90,27 @@ public class ClientTicketService {
                     onError.accept("Exception during fetching tickets: " + e.getMessage());
                     return null;
                 });
-        return null;
     }
 
     /**
      * Create a new ticket via the backend API.
      *
-     * @param createTicketJson JSON string representing the create ticket request.
+     * @param requestBody create ticket request.
      * @param onSuccess        Consumer with the response JSON on success.
      * @param onError          Consumer with an error message on failure.
      */
-    public void createTicket(String createTicketJson, Consumer<TicketResponse> onSuccess, Consumer<String> onError) {
+    public void createTicket(CreateTicketRequest requestBody, Consumer<TicketResponse> onSuccess, Consumer<String> onError) {
         String url = baseUrl + "/tickets";
+
+        try {
+            String requestJson = objectMapper.writeValueAsString(requestBody);
+
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .header("Content-Type", "application/json")
                 .header("Authorization", authManager.getAuthHeader())
-                .POST(HttpRequest.BodyPublishers.ofString(createTicketJson))
+                .POST(HttpRequest.BodyPublishers.ofString(requestJson))
                 .build();
 
         httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
@@ -133,6 +135,9 @@ public class ClientTicketService {
                     onError.accept("Exception during creating ticket: " + e.getMessage());
                     return null;
                 });
+        } catch (JsonProcessingException e) {
+            onError.accept("Error processing request: " + e.getMessage());
+        }
     }
 
 
@@ -197,10 +202,10 @@ public class ClientTicketService {
                 .thenAccept(response -> {
                     if(response.statusCode() == 200) {
                         try {
-                            JsonNode rootNode = objectMapper.readTree(response.body());
-                            JsonNode dataNode = rootNode.path("data");
-                            // dataNode is a PageResponse structure.
-                            PageResponse<TicketResponse> pageResponse = objectMapper.treeToValue(dataNode, objectMapper.getTypeFactory().constructParametricType(PageResponse.class, TicketResponse.class));
+                            TypeReference<ApiResponseBody<TicketDataResponse<PageResponse<TicketResponse>>>> typeRef = new TypeReference<>(){};
+                            ApiResponseBody<TicketDataResponse<PageResponse<TicketResponse>>> body = objectMapper.readValue(response.body(), typeRef);
+
+                            PageResponse<TicketResponse> pageResponse = body.getData().getTickets();
                             onSuccess.accept(pageResponse);
                         } catch(IOException e) {
                             log.error("Error parsing tickets page response", e);
@@ -215,5 +220,99 @@ public class ClientTicketService {
                     onError.accept("Exception during fetching all tickets: " + e.getMessage());
                     return null;
                 });
+    }
+
+    public void updateTicketStatus(UUID ticketId, TicketStatus newStatus,
+                                   Consumer<TicketResponse> onSuccess,
+                                   Consumer<String> onError) {
+        try {
+            UpdateTicketStatusRequest request = new UpdateTicketStatusRequest();
+            request.setStatus(newStatus);
+
+            String jsonBody = objectMapper.writeValueAsString(request);
+            String url = String.format("%s/tickets/%s/status", baseUrl, ticketId);
+
+            HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", authManager.getAuthHeader())
+                    .method("PATCH", HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
+                    .thenAccept(response -> {
+                        if (response.statusCode() == 200) {
+                            try {
+                                TypeReference<ApiResponseBody<SingleTicketResponse>> typeRef =
+                                        new TypeReference<>() {};
+                                ApiResponseBody<SingleTicketResponse> body =
+                                        objectMapper.readValue(response.body(), typeRef);
+
+                                onSuccess.accept(body.getData().getTicket());
+                            } catch (IOException e) {
+                                log.error("Error parsing status update response", e);
+                                onError.accept("Error parsing status update response: " + e.getMessage());
+                            }
+                        } else {
+                            onError.accept("Error updating ticket status: HTTP " + response.statusCode());
+                        }
+                    })
+                    .exceptionally(e -> {
+                        log.error("Exception during status update", e);
+                        onError.accept("Exception during status update: " + e.getMessage());
+                        return null;
+                    });
+
+        } catch (Exception e) {
+            log.error("Error preparing status update request", e);
+            onError.accept("Error preparing status update request: " + e.getMessage());
+        }
+    }
+
+    public void addComment(UUID ticketId, String comment,
+                           Consumer<SingleCommentResponse> onSuccess,
+                           Consumer<String> onError) {
+        try {
+            AddCommentRequest request = new AddCommentRequest();
+            request.setMessage(comment);
+
+            String jsonBody = objectMapper.writeValueAsString(request);
+            String url = String.format("%s/tickets/%s/comments", baseUrl, ticketId);
+
+            HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", authManager.getAuthHeader())
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
+                    .thenAccept(response -> {
+                        if (response.statusCode() == 201) {
+                            try {
+                                TypeReference<ApiResponseBody<SingleCommentResponse>> typeRef =
+                                        new TypeReference<>() {};
+                                ApiResponseBody<SingleCommentResponse> body =
+                                        objectMapper.readValue(response.body(), typeRef);
+
+                                onSuccess.accept(body.getData());
+                            } catch (IOException e) {
+                                log.error("Error parsing comment response", e);
+                                onError.accept("Error parsing comment response: " + e.getMessage());
+                            }
+                        } else {
+                            onError.accept("Error adding comment: HTTP " + response.statusCode());
+                        }
+                    })
+                    .exceptionally(e -> {
+                        log.error("Exception during comment addition", e);
+                        onError.accept("Exception during comment addition: " + e.getMessage());
+                        return null;
+                    });
+
+        } catch (Exception e) {
+            log.error("Error preparing comment request", e);
+            onError.accept("Error preparing comment request: " + e.getMessage());
+        }
     }
 }

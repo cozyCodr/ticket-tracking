@@ -105,7 +105,7 @@ public class DialogUtils {
 
         // Split message into words
         String[] words = message.split("\\s+");
-        List lines = new List();
+        java.util.List<String> lines = new ArrayList<>();
         StringBuilder currentLine = new StringBuilder();
 
         for (String word : words) {
@@ -125,6 +125,6 @@ public class DialogUtils {
         }
 
         // Join lines with HTML line breaks
-        return String.join((CharSequence) "<br>", (CharSequence) lines);
+        return String.join("<br>", lines);
     }
 }

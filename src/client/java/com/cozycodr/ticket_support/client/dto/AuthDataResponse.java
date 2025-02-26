@@ -13,4 +13,8 @@ public class AuthDataResponse {
     private String token;
     private String username;
     private String role;
+
+    public boolean isItSupport() {
+        return "IT_SUPPORT".equals(role);
+    }
 }
